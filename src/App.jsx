@@ -2,11 +2,12 @@ import { useState } from 'react'
 import './App.css'
 
 const App = () => {
+  const FIREBASE_URL = `https://us-central1-music-downloader-982f7.cloudfunctions.net`
   const [youtubeLink, setYoutubeLink] = useState("")
   const buttonLabel = "Downloading file"
   const runScript = () => {
     console.log(youtubeLink)
-    fetch('http://localhost:5000/execute-script', {
+    fetch(`https://us-central1-music-downloader-982f7.cloudfunctions.net/musicDownload`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
