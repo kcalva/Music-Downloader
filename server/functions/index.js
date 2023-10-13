@@ -1,28 +1,34 @@
 const functions = require('firebase-functions');
-const { exec } = require('child_process');
-
+const ytdl = require('ytdl-core');
+const { Storage } = require('@google-cloud/storage');
 const cors = require('cors')({ origin: true });
-
+const storage = new Storage()
 exports.musicDownload = functions.https.onRequest(async (req, res) => {
     cors(req, res, async () => {
-        console.log(req.body)
         const { youtubeLink } = req.body;
+        try {
+            const videoInfo = await ytdl.getInfo(youtubeLink)
+            console.log('this is videoInfo', videoInfo)
+            const audioStream = ytdl(youtubeLink, { filter: 'audioonly' })
+            const bucket = storage.bucket("music-downloader-982f7.appspot.com")
+            const file = bucket.file(`audio/${videoInfo.videoDetails.title}.mp3`)
+            const writeStream = file.createWriteStream()
 
-        const directory = `/Users/kev/Documents/Music`;
+            audioStream.pipe(writeStream)
 
-        const command = `youtube-dl --audio-quality 0 -i --extract-audio --audio-format mp3 -o './%(title)s.%(ext)s' --add-metadata --embed-thumbnail --metadata-from-title "%(artist)s - %(title)s" ${youtubeLink}`;
+            writeStream.on('error', (error) => {
+                console.error('Error uploading to Firebase Storage:', error)
+                res.status(500).send('Error uploading audio.')
+            })
 
-        await exec(command, { shell: '/bin/zsh' }, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error: ${error.message}`);
-                res.status(500).send(`Error occurred ${error.message}`);
-            } else if (stderr) {
-                console.error(`Stderr: ${stderr}`);
-                res.status(500).send(`Error occurred ${stderr}`);
-            } else {
-                console.log(`Command output: ${stdout}`);
-                res.send('Command executed successfully');
-            }
-        });
+            writeStream.on('finish', () => {
+                res.status(200).send('Audio uploaded successfully!')
+            })
+        }
+        catch (error) {
+            console.error('Error downloading audio:', error)
+            res.status(500).send('Error downloading audio.')
+        }
+
     })
 });

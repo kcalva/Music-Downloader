@@ -7,7 +7,7 @@ const App = () => {
   const buttonLabel = "Downloading file"
   const runScript = () => {
     console.log(youtubeLink)
-    fetch(`https://us-central1-music-downloader-982f7.cloudfunctions.net/musicDownload`, {
+    fetch(`${FIREBASE_URL}/musicDownload`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
