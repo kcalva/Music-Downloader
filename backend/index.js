@@ -7,7 +7,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-const port = 5000;
+// const port = process.env.PORT || 5000;
 
 app.use(express.json());
 
@@ -30,6 +30,6 @@ app.post('/execute-script', (req, res) => {
 
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port} `);
-});
+// app.listen(port, () => {
+//     console.log(`Server is running on port ${port} `);
+// });
